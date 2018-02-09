@@ -2,8 +2,57 @@
 <html>
 <head>
 	<title>Quick Animation</title>
+	<script type="text/javascript" src="qanim.js"></script>
 </head>
 <body>
+<canvas id="c"></canvas>
+
+<script type="text/javascript">
 	
+let scene = qanim.scene;
+let res = qanim.res;
+let entity = qanim.entity;
+
+qanim.init(document.getElementById('c'))
+
+qanim.start(function(){
+	scene.env.y = screen.height/2;
+
+	res.set_sprites(function(){
+		res.add_sprite("dr","dragon.svg",128);
+	});
+
+	var s = scene.add();
+	var s2 = scene.add();
+	var dragon = entity.add();
+	var dragon2 = entity.add();
+	dragon.scale = 0.5
+	dragon.x_offset = 64;
+	dragon.y_offset = 32;
+
+	s.define_step(function(env){
+		s2.angle=(s2.angle+1)%360;
+	});
+	s2.define_step(function(env){
+		s.x=(s.x+1)%360;
+	});
+
+	dragon.define_draw(function(env)
+	{
+		res.draw_sprite("dr",env,dragon);
+	});
+	dragon2.define_draw(function(env)
+	{
+		res.draw_sprite("dr",env,dragon2);
+	});
+
+	s.addObject(dragon2);
+	s2.addObject(dragon);
+	s.addChildScene(s2);
+	scene.set_main(s);
+});
+
+</script>
 </body>
+
 </html>
