@@ -32,30 +32,36 @@ var qanim =
 		{
 			var a = 
 			{
-				entities: [],
 				children: [],
+				animations: [],
 				time: [],
 				x: 0,
 				y: 0,
 				x_offset: 0,
 				y_offset: 0,
 				angle: 0,
-				addObject: function(entity)
-				{
-					a.entities.push(entity);
-				},
+				scale:1,
+				parent:0,
 				addChildScene: function(scene)
 				{
 					a.children.push(scene);
+					scene.parent = a;
+				},
+				addAnimation: function(animation)
+				{
+					var anim = Object.assign({},qanim.anim.ANIMATIONS[animation]);
+					a.animations.push(anim);
 				},
 
 				begin_step: function(env){},
 				step: function(env){},
 				end_step: function(env){},
+				draw: function(env){},
 
 				define_step: function(_func){a.step = _func;},
 				define_begin_step: function(_func){a.begin_step = _func;},
 				define_end_step: function(_func){a.end_step = _func;},
+				define_draw: function(_func){a.draw= _func;},
 
 				adjust: function(env)
 				{
@@ -68,6 +74,10 @@ var qanim =
 
 				run_step: function(env)
 				{
+					for(var i in a.animations)
+					{
+						a.animations[i].step(env,a);
+					}
 					a.step(env);
 					env = a.adjust(env);
 					for(var i in a.entities)
@@ -83,6 +93,7 @@ var qanim =
 				},
 				run_draw: function(env)
 				{
+					a.draw(env,qanim.canvas);
 					env = a.adjust(env);	
 					for(var i in a.entities)
 					{
@@ -119,42 +130,98 @@ var qanim =
 			qanim.scene.main.run_step(qanim.scene.env);
 			qanim.scene.main.run_draw(qanim.scene.env);
 			setTimeout(qanim.scene.loop,1000/fps);
-		}
+		},
 	},
-	entity:
+	anim:
 	{
-		add: function()
+		ANIMATIONS: {},
+		trans:
 		{
-			var a = 
+			smooth: function(a,b,t1,t2,t,o)
 			{
-				x: 0,
-				y: 0,
-				x_offset: 0,
-				y_offset: 0,
-				angle: 0,
-				res:
-				{
-					image: 0,
-				},
-				scale: 1,
-				temp: {},
-				step: function(env){},
-				draw: function(env){},
-				define_step: function(_func)
-				{
-					a.step = _func;
-				},
-				define_draw: function(_func)
-				{
-					a.draw= _func;
-				},
+				var dt = t2-t1;
+				var dy = b-a;
+				var c = -Math.log(10*dy)/dt;
+				return b-dy*Math.exp(c*(t-t1));
+			},
+			constant: function(a,b,t1,t2,t,o)
+			{
+				return a+(b-a)/(t2-t1)*(t-t1);
+			},
+			none: function(a,b,t1,t2,t,o)
+			{
+				return ((t-t1)>=t2-1) ? b:a;
 			}
-			return a;
+		},
+		create: function(name)
+		{
+			var a =
+			{
+				name: name,
+				anchors: {_pos:{},},
+				/*
+					{
+						_pos: {x:1},
+						x: [{time:100,val:2,trans:"none"}],
+					}
+				*/
+				pos: 0,
+				time: 0,
+				host: 0,
+				first_anchor: {},
+				step: function(env,obj)
+				{
+					for(var i in a.anchors)
+					{
+						if(i=="_pos") continue;
+						let pos = a.anchors._pos[i]+1;
+						var anchor_init = 0;
+						if(!(a.first_anchor[i]))
+							a.first_anchor[i] = {time:0,val:obj[i],trans:"none"};						
+						if(pos==0)
+							anchor_init =a.first_anchor[i];
+						else
+							anchor_init = a.anchors[i][pos-1];
+						if(pos<a.anchors[i].length)
+						{
+							let anchor_final = a.anchors[i][pos];
+							let _a = anchor_init.val;
+							let _b = anchor_final.val;
+							let _t1 = anchor_init.time;
+							let _t2 = anchor_final.time;
+							let _o = anchor_final.param;
+							obj[i] = qanim.anim.trans[anchor_final.trans](_a,_b,_t1,_t2,a.time,_o);
+							if(a.time>_t2)
+								a.anchors._pos[i]+=1;
+						}
+					}
+					a.time++;
+				}
+			};
+			qanim.anim.ANIMATIONS[name] = a;
+		},
+		/*
+			{x:[2,"smooth",param],y:[30,"constant",param]}
+		*/
+		on: function(name,time,value)
+		{
+			let anim = qanim.anim.ANIMATIONS[name];
+			for(var i in value)
+			{
+				if(!(anim.anchors[i]))
+				{
+					anim.anchors[i] = [];
+					anim.anchors._pos[i] = -1;
+				}
+				anim.anchors[i].push({
+					time: 	30*time,
+					trans: 	value[i][1] || "constant",
+					val: 	value[i][0] | value[i],
+					param: value[i][2] || {},
+				});
+				anim.anchors[i].sort(function(a,b){return a.time-b.time;});
+			}
 		}
-	},
-	move:
-	{
-
 	},
 	cache:
 	{
@@ -203,11 +270,11 @@ var qanim =
 			let ctx = qanim.canvas;
 			ctx.save();
 			ctx.translate(Math.floor(env.x+obj.x),Math.floor(env.y+obj.y));
-			ctx.translate(Math.floor(obj.x_offset),Math.floor(obj.y_offset));
+//			ctx.translate(Math.floor(obj.x_offset*obj.scale),Math.floor(obj.y_offset*obj.scale));
 			ctx.rotate(((Math.floor(env.angle+obj.angle)+360)%360)/180*Math.PI);
 			let img = qanim.res.SPRITES[name];
-			ctx.drawImage(img,Math.floor(-obj.x_offset),Math.floor(-obj.y_offset),Math.floor(img.width*obj.scale),Math.floor(img.height*obj.scale));
-			ctx.restore();	
+			ctx.drawImage(img,Math.floor(-obj.x_offset*obj.scale),Math.floor(-obj.y_offset*obj.scale),Math.floor(img.width*obj.scale),Math.floor(img.height*obj.scale));
+			ctx.restore();
 		},
 		init: function(){},
 		set_sprites: function(func_)

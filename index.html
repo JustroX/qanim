@@ -12,8 +12,9 @@
 let scene = qanim.scene;
 let res = qanim.res;
 let entity = qanim.entity;
+let anim = qanim.anim;
 
-qanim.init(document.getElementById('c'))
+qanim.init(document.getElementById('c'));
 
 qanim.start(function(){
 	scene.env.y = screen.height/2;
@@ -22,33 +23,23 @@ qanim.start(function(){
 		res.add_sprite("dr","dragon.svg",128);
 	});
 
+	anim.create("animation1");
+	anim.on("animation1",1,{x:1000,scale:3});
 	var s = scene.add();
-	var s2 = scene.add();
-	var dragon = entity.add();
-	var dragon2 = entity.add();
-	dragon.scale = 0.5
-	dragon.x_offset = 64;
-	dragon.y_offset = 32;
-
-	s.define_step(function(env){
-		s2.angle=(s2.angle+1)%360;
-	});
-	s2.define_step(function(env){
-		s.x=(s.x+1)%360;
-	});
-
-	dragon.define_draw(function(env)
+	s.x_offset = 64;
+	s.y_offset = 64;
+	s.x = 100;
+	s.addAnimation("animation1");
+	
+	s.define_draw(function(env,ctx)
 	{
-		res.draw_sprite("dr",env,dragon);
-	});
-	dragon2.define_draw(function(env)
-	{
-		res.draw_sprite("dr",env,dragon2);
+		res.draw_sprite("dr",env,s);
+		ctx.beginPath();
+		ctx.arc(env.x+env.x_offset+s.x,env.y+env.y_offset+s.y,2,0,2*Math.PI);
+		ctx.stroke();
+		ctx.closePath();
 	});
 
-	s.addObject(dragon2);
-	s2.addObject(dragon);
-	s.addChildScene(s2);
 	scene.set_main(s);
 });
 
