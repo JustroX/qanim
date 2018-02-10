@@ -4,12 +4,13 @@ var qanim =
 	canvas_src: 0,
 	init: function(canvas)
 	{
+		qanim.cache.init();
 		qanim.canvas = canvas.getContext('2d');
 		qanim.canvas_src = canvas;
 		canvas.width = screen.width;
 		canvas.height = screen.height;
 	},
-	start: function(func_)
+	start: function(func_=function(){;})
 	{
 		func_();
 		qanim.res.init();
@@ -41,6 +42,8 @@ var qanim =
 				y_offset: 0,
 				angle: 0,
 				scale:1,
+				scalex:1,
+				scaley:1,
 				parent:0,
 				addChildScene: function(scene)
 				{
@@ -225,22 +228,22 @@ var qanim =
 	},
 	cache:
 	{
-		sin: [],
-		cos: [],
-		tan: [],
+		sin_: [],
+		cos_: [],
+		tan_: [],
 		init : function()
 		{
 			let cache = qanim.cache;
 			for(var i=0; i<359; i++)
 			{
-				cache.sin.push(Math.sin(i));
-				cache.cos.push(Math.cos(i));
-				cache.tan.push(Math.tan(i));
+				cache.sin_.push(Math.sin(i/180*Math.PI));
+				cache.cos_.push(Math.cos(i/180*Math.PI));
+				cache.tan_.push(Math.tan(i/180*Math.PI));
 			}
 		},
-		sin: function(x){return qanim.cache.sin[Math.floor(x) % 360];},
-		cos: function(x){return qanim.cache.cos[Math.floor(x) % 360];},
-		tan: function(x){return qanim.cache.tan[Math.floor(x) % 360];},
+		sin: function(x){return qanim.cache.sin_[Math.floor(x+360) % 360];},
+		cos: function(x){return qanim.cache.cos_[Math.floor(x+360) % 360];},
+		tan: function(x){return qanim.cache.tan_[Math.floor(x+360) % 360];},
 	},
 	res:
 	{
@@ -270,10 +273,9 @@ var qanim =
 			let ctx = qanim.canvas;
 			ctx.save();
 			ctx.translate(Math.floor(env.x+obj.x),Math.floor(env.y+obj.y));
-//			ctx.translate(Math.floor(obj.x_offset*obj.scale),Math.floor(obj.y_offset*obj.scale));
 			ctx.rotate(((Math.floor(env.angle+obj.angle)+360)%360)/180*Math.PI);
 			let img = qanim.res.SPRITES[name];
-			ctx.drawImage(img,Math.floor(-obj.x_offset*obj.scale),Math.floor(-obj.y_offset*obj.scale),Math.floor(img.width*obj.scale),Math.floor(img.height*obj.scale));
+			ctx.drawImage(img,Math.floor(-obj.x_offset*obj.scale*obj.scalex),Math.floor(-obj.y_offset*obj.scale*obj.scaley),Math.floor(img.width*obj.scale*obj.scalex),Math.floor(img.height*obj.scale*obj.scaley));
 			ctx.restore();
 		},
 		init: function(){},
@@ -281,6 +283,5 @@ var qanim =
 		{
 			qanim.res.init = func_;
 		},
-
 	}
 }

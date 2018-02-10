@@ -3,6 +3,10 @@
 <head>
 	<title>Quick Animation</title>
 	<script type="text/javascript" src="qanim.js"></script>
+	<script type="text/javascript" src="qanim_package_manager.js"></script>
+
+	<script type="text/javascript" src="qanim_pack_def1.js"></script>
+
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -11,37 +15,11 @@
 	
 let scene = qanim.scene;
 let res = qanim.res;
-let entity = qanim.entity;
 let anim = qanim.anim;
 
 qanim.init(document.getElementById('c'));
-
-qanim.start(function(){
-	scene.env.y = screen.height/2;
-
-	res.set_sprites(function(){
-		res.add_sprite("dr","dragon.svg",128);
-	});
-
-	anim.create("animation1");
-	anim.on("animation1",1,{x:1000,scale:3});
-	var s = scene.add();
-	s.x_offset = 64;
-	s.y_offset = 64;
-	s.x = 100;
-	s.addAnimation("animation1");
-	
-	s.define_draw(function(env,ctx)
-	{
-		res.draw_sprite("dr",env,s);
-		ctx.beginPath();
-		ctx.arc(env.x+env.x_offset+s.x,env.y+env.y_offset+s.y,2,0,2*Math.PI);
-		ctx.stroke();
-		ctx.closePath();
-	});
-
-	scene.set_main(s);
-});
+qpm.import(qanim_pack_def1);
+qanim.start();
 
 </script>
 </body>
