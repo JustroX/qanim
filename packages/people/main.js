@@ -7,15 +7,19 @@ var people =
 	{
 		move_right:
 		[
-			[20,{x:1000}],
+			[20,{x:1000,y:[300,"damped"]}],
 		],
 		swing:
 		[
-			[20,{angle:[0,"damped"],opacity:[0,"damped"]}]
+			[20,{angle:[0,"damped"]}]
 		],
 		swing_big:
 		[
 			[100,{angle:[0,"damped",{frequency:0.06}]}]
+		],
+		shake_head:
+		[
+			[100,{angle:[0,"damped"]}]
 		],
 
 	},
@@ -26,8 +30,9 @@ var people =
 			initial_vars:
 			{
 				x: 500,
-				y:300,
-				x_offset: 32
+				y:305,
+				x_offset:32,
+				y_offset:16,
 			},
 			sprite: "body",
 			animation: "move_right",
@@ -37,10 +42,10 @@ var people =
 		{
 			initial_vars:
 			{
-				x_offset: 16,
-				y:16,
 				angle: 30,
-				depth: -1
+				depth: -1,
+				x_offset: 32,
+				y_offset: 3
 			},
 			animation: "swing",
 			sprite: "arm",
@@ -49,10 +54,10 @@ var people =
 		{
 			initial_vars:
 			{
-				x_offset: 16,
-				y:16,
 				depth: 4,
 				angle:-30,
+				x_offset: 32,
+				y_offset: 3,
 			},
 			animation: "swing",
 			sprite: "arm",
@@ -61,10 +66,9 @@ var people =
 		{
 			initial_vars:
 			{
-				depth:-0.5,
-				x_offset:16,
-				y:64,
 				angle: 30,
+				x_offset:32,
+				y: 44
 			},
 			sprite: "leg",
 			animation: "swing_big"
@@ -73,22 +77,24 @@ var people =
 		{
 			initial_vars:
 			{
-				depth:0.5,
-				x_offset:16,
-				y:64,
 				angle: -30,
+				x_offset:32,
+				y: 44
 			},
 			sprite: "leg",
-			animation: "swing_big"
+			animation: "swing_big",
 		},
 		head:
 		{
 			initial_vars:
 			{
-				x_offset:16,
-				y_offset:32,
-				y:0
+				x_offset: 32,
+				y_offset: 64,
+				y: -13,
+				x: -2,
+				angle: 10,
 			},
+			animation: "shake_head",
 			sprite: "head"
 		}
 	},
@@ -96,26 +102,26 @@ var people =
 	{
 		head:
 		{
-			dir: "head.png",
-			width: 32,
-			height: 32,
+			dir: "head_side.svg",
+			width: 64,
+			height: 64,
 		},
 		body:
 		{
-			dir: "body.png",
+			dir: "body.svg",
 			width: 64,
 			height: 64,
 		},
 		arm:
 		{
-			dir: "arm.png",
-			width: 32,
+			dir: "arm.svg",
+			width: 64,
 			height: 64,
 		},
 		leg:
 		{
-			dir: "leg.png",
-			width: 32,
+			dir: "leg.svg",
+			width: 64,
 			height: 64,
 		},
 	},
