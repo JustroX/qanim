@@ -4,9 +4,6 @@
 	<title>Quick Animation</title>
 	<script type="text/javascript" src="qanim.js"></script>
 	<script type="text/javascript" src="qanim_package_manager.js"></script>
-
-	<script type="text/javascript" src="qanim_pack_def1.js"></script>
-
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -18,8 +15,11 @@ let res = qanim.res;
 let anim = qanim.anim;
 
 qanim.init(document.getElementById('c'));
-qpm.import(qanim_pack_def1);
-qanim.start();
+qpm.import(["people","def1"],function()
+{
+	qpm.set_main("people","people1");
+	qanim.start();
+});
 
 </script>
 </body>
