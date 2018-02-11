@@ -85,6 +85,7 @@ var qpm =
 			if(scene[i].step)
 				s.define_step(scene[i].step);
 				s.define_draw(function(env){
+					if(scene[i].sprite)
 					qanim.res.draw_sprite(d+scene[i].sprite,env,s);
 					if(scene[i].draw)
 					scene[i].draw(env);

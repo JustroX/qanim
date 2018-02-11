@@ -277,7 +277,7 @@ var qanim =
 			qanim.res.SPRITES[name] = img;
 			qanim.res.sprlen+=1;
 		},
-		draw_sprite(name,env,obj)
+		draw_sprite: function(name,env,obj)
 		{
 			if(!(qanim.res.SPRITES[name].ready)) return;
 			let ctx = qanim.canvas;
@@ -288,6 +288,39 @@ var qanim =
 			ctx.globalAlpha = obj.opacity;
 			ctx.drawImage(img,Math.floor(-obj.x_offset*obj.scale*obj.scalex),Math.floor(-obj.y_offset*obj.scale*obj.scaley),Math.floor(img.width*obj.scale*obj.scalex),Math.floor(img.height*obj.scale*obj.scaley));
 			ctx.restore();
+		},
+		draw_text: function(text,x,y,abs)
+		{
+			let ctx = qanim.canvas;
+			
+		},
+		shape:
+		{
+			SHAPES: {},
+			add: function(name,path,closed)
+			{
+				qanim.res.shape.SHAPES[name] = {path:path,closed:closed};
+			},
+		},
+		font:
+		{
+			FONTS: [],
+			add: function(fonts)
+			{
+				qanim.res.font.FONTS = qanim.res.font.FONT.concat(fonts); 
+			},
+			init : function()
+			{
+				if(!(WebFont)) return;
+				WebFont.load({
+					google:
+					{
+					  families: qanim.res.font.FONTS,
+					},
+					timeout:5000,
+					fontactive: function(familyName,fvd){;},
+				});
+			}
 		},
 		init: function(){},
 		set_sprites: function(func_)

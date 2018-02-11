@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>Quick Animation</title>
+	<script type="text/javascript" src="ext/webfont.js"></script>
 	<script type="text/javascript" src="qanim.js"></script>
 	<script type="text/javascript" src="qanim_package_manager.js"></script>
 </head>
@@ -17,7 +18,7 @@ let anim = qanim.anim;
 qanim.init(document.getElementById('c'));
 qpm.import(["people","def1"],function()
 {
-	qpm.set_main("people","people1");
+	qpm.set_main("people","root");
 	qanim.start();
 });
 

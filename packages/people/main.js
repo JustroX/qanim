@@ -7,11 +7,11 @@ var people =
 	{
 		move_right:
 		[
-			[20,{x:1000,y:[300,"damped"]}],
+			[6,{x:1000}],
 		],
 		swing:
 		[
-			[20,{angle:[0,"damped"]}]
+			[100,{angle:[0,"damped"]}]
 		],
 		swing_big:
 		[
@@ -21,22 +21,44 @@ var people =
 		[
 			[100,{angle:[0,"damped"]}]
 		],
+		shake_body:
+		[
+			[5,{y:[1,"damped"]}],
+		],
 
 	},
 	scenes:
 	{
+		root:
+		{
+			initial_vars:
+			{
+				scaley:0.7,
+				scalex:1.1,
+			},
+			sprite: "bg",
+			children: ["people1"],
+		},
 		people1:
 		{
 			initial_vars:
 			{
 				x: 500,
-				y:305,
+				y: 400,
+			},
+			animation: "move_right",
+			children: ["body","arm1","arm2","leg1","leg2","head"],
+
+		},
+		body:
+		{
+			initial_vars:
+			{
 				x_offset:32,
 				y_offset:16,
 			},
+			animation: "shake_body",
 			sprite: "body",
-			animation: "move_right",
-			children: ["arm1","arm2","leg1","leg2","head"],
 		},
 		arm1:
 		{
@@ -92,7 +114,7 @@ var people =
 				y_offset: 64,
 				y: -13,
 				x: -2,
-				angle: 10,
+				angle: 5,
 			},
 			animation: "shake_head",
 			sprite: "head"
@@ -124,5 +146,11 @@ var people =
 			width: 64,
 			height: 64,
 		},
+		bg:
+		{
+			dir: "bg.png",
+			width: 1280,
+			height:1024
+		}
 	},
 };
