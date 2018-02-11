@@ -23,8 +23,8 @@ qpm.import(["people","def1"],function()     //import scenes
 	qanim.start();                          //start animation
 });
 ```
-Basically you 
-1. define the scenes (or the animation)
+Basically
+1. Define the scenes (or the animation)
 2. Import it
 3. Tada! Your done!
 
