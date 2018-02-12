@@ -60,7 +60,8 @@ var qpm =
 	import_animations: function(d,animations)
 	{
 		for(let i in animations)
-		{			qanim.anim.create(i);
+		{			
+			qanim.anim.create(i);
 			for(let j in animations[i])
 			{
 				let e = animations[i][j];
@@ -81,7 +82,22 @@ var qpm =
 				s[j] = scene[i].initial_vars[j];
 			}
 			if(scene[i].animation)
+			{
+				if(scene[i].animation instanceof Array)
+				{
+					let temp_anim_name = d +"_"+ qpm.util.hash();
+					let e_anim = scene[i].animation;
+					qanim.anim.create(temp_anim_name);
+					for(let anchor in e_anim)
+					{
+						let e = e_anim[anchor];
+						qanim.anim.on(temp_anim_name,e[0],e[1]);
+					}
+					s.addAnimation(temp_anim_name);
+				}
+				else
 				s.addAnimation(scene[i].animation);
+			}
 			if(scene[i].step)
 				s.define_step(scene[i].step);
 				s.define_draw(function(env){
@@ -126,6 +142,15 @@ var qpm =
 		for(let i in trans)
 		{
 			qanim.anim.trans[i] = trans[i];
+		}
+	},
+	util:
+	{
+		HASH_SEED: 0,
+		hash: function()
+		{
+			let s = (qpm.util.HASH_SEED++)+"_hash_keyword";
+			return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
 		}
 	}
 }

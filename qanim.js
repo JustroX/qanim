@@ -2,13 +2,13 @@ var qanim =
 {
 	canvas: 0,
 	canvas_src: 0,
-	init: function(canvas)
+	init: function(canvas,param={})
 	{
 		qanim.cache.init();
 		qanim.canvas = canvas.getContext('2d');
 		qanim.canvas_src = canvas;
-		canvas.width = screen.width;
-		canvas.height = screen.height;
+		canvas.width = param.width || screen.width;
+		canvas.height = param.height || screen.height;
 	},
 	start: function(func_=function(){;})
 	{
@@ -28,6 +28,29 @@ var qanim =
 			x_offset: 0,
 			y_offset: 0,
 			angle: 0,
+			gscalex: 1,
+			gscaley: 1,
+		},
+		camera:
+		{
+			x: 0,
+			y: 0,
+			width: 0,
+			height: 0,
+			angle: 0,
+			init: function()
+			{
+				let c = qanim.scene.camera;
+				c.width = c.width || qanim.canvas_src.width;
+				c.height = c.height || qanim.canvas_src.height;
+				let nenv = JSON.parse(JSON.stringify(qanim.scene.env));
+			//	nenv.angle += c.angle;
+				nenv.gscalex = qanim.canvas_src.width/c.width;
+				nenv.gscaley = qanim.canvas_src.height/c.height;
+			//	nenv.x -= c.x;
+			//	nenv.y -= c.y;
+				return nenv;
+			}
 		},
 		add: function()
 		{
@@ -44,6 +67,8 @@ var qanim =
 				scale:1,
 				scalex:1,
 				scaley:1,
+				gscalex: 1,
+				gscaley: 1,
 				parent:0,
 				depth:0,
 				opacity: 1,
@@ -80,6 +105,9 @@ var qanim =
 					b.x =env.x+ a.x ;//+ a.x_offset;
 					b.y =env.y+ a.y ;//+ a.y_offset;
 					b.angle =env.angle+ a.angle;
+					b.gscalex = a.gscalex * env.gscalex;
+					b.gscaley = a.gscaley * env.gscaley;
+
 					return b;
 				},
 
@@ -100,7 +128,7 @@ var qanim =
 				run_draw: function(env)
 				{
 					let todrawlater = [];
-					let start_env = env;
+					let start_env =Object.assign({},env);
 					env = a.adjust(env);
 					a.children.sort(function(a,b){return -a.depth+b.depth;});
 					for(let i in a.children)
@@ -139,9 +167,10 @@ var qanim =
 		{
 			let fps = qanim.scene.FPS;
 			let c = qanim.canvas_src;
+			let cenv = qanim.scene.camera.init();
 			qanim.canvas.clearRect(0,0,c.width,c.height);
-			qanim.scene.main.run_step(qanim.scene.env);
-			qanim.scene.main.run_draw(qanim.scene.env);
+			qanim.scene.main.run_step(cenv);
+			qanim.scene.main.run_draw(cenv);
 			setTimeout(qanim.scene.loop,1000/fps);
 		},
 	},
@@ -174,41 +203,77 @@ var qanim =
 				anchors: {_pos:{},},
 				/*
 					{
-						_pos: {x:1},
+						_pos: {x:1,play_animation,},
 						x: [{time:100,val:2,trans:"none"}],
+						play_animation: [{time:100,val:"animation_name"}]
 					}
 				*/
+				animations: {},
 				pos: 0,
 				time: 0,
 				host: 0,
+				stopped: 0,
 				first_anchor: {},
-				step: function(env,obj,c)
+				step: function(env,obj,c,parent=null)
 				{
-					for(let i in obj.animations[c].anchors)
+					parent = parent || obj;
+					if(parent.animations[c].stopped) return;
+					for(let i in parent.animations[c].anchors)
 					{
-						if(i=="_pos") continue;
-						let pos = obj.animations[c].anchors._pos[i]+1;
-						let anchor_init = 0;
-						if(!(obj.animations[c].first_anchor[i]))
-							obj.animations[c].first_anchor[i] = {time:0,val:obj[i],trans:"none"};						
-						if(pos==0)
-							anchor_init =obj.animations[c].first_anchor[i];
-						else
-							anchor_init = obj.animations[c].anchors[i][pos-1];
-						if(pos<obj.animations[c].anchors[i].length)
+						if(i=="animation_play")
 						{
-							let anchor_final = obj.animations[c].anchors[i][pos];
+							for(let j in parent.animations[c].animations) //for each animation
+							{
+								for(let k in parent.animations[c].anchors[i]) //for each achor  point
+								{
+									if(parent.animations[c].anchors[i][k].val == j)
+									if(parent.animations[c].time>=parent.animations[c].anchors[i][k].time)
+									{	
+										let child_anim = parent.animations[c].animations[j];
+										child_anim.step(env,obj,j,parent.animations[c]);
+									}
+								}
+							}
+							continue;
+						}
+						if(i=="animation_stop")
+						{
+							for(let k in parent.animations[c].anchors[i])
+							{
+								let w = parent.animations[c].anchors[i][k];
+								if(w.time<=parent.animations[c].time)
+								{
+									for(let j in parent.animations[c].animations) //for each animation
+									{
+										if(parent.animations[c].anchors[i][k].val == j)
+											parent.animations[c].animations[j].stopped=1;	
+									}
+								}
+							}
+						}
+						if(i=="_pos") continue;
+						let pos = parent.animations[c].anchors._pos[i]+1;
+						let anchor_init = 0;
+						if(!(parent.animations[c].first_anchor[i]))
+							parent.animations[c].first_anchor[i] = {time:0,val:obj[i],trans:"none"};						
+						if(pos==0)
+							anchor_init =parent.animations[c].first_anchor[i];
+						else
+							anchor_init = parent.animations[c].anchors[i][pos-1];
+						if(pos<parent.animations[c].anchors[i].length)
+						{
+							let anchor_final = parent.animations[c].anchors[i][pos];
 							let _a = anchor_init.val;
 							let _b = anchor_final.val;
 							let _t1 = anchor_init.time;
 							let _t2 = anchor_final.time;
 							let _o = anchor_final.param;
-							obj[i] = qanim.anim.trans[anchor_final.trans](_a,_b,_t1,_t2,obj.animations[c].time,_o);
-							if(obj.animations[c].time>_t2)
-								obj.animations[c].anchors._pos[i]+=1;
+							obj[i] = qanim.anim.trans[anchor_final.trans](_a,_b,_t1,_t2,parent.animations[c].time,_o);
+							if(parent.animations[c].time>_t2)
+								parent.animations[c].anchors._pos[i]+=1;
 						}
 					}
-					obj.animations[c].time++;
+					parent.animations[c].time++;
 				}
 			};
 			qanim.anim.ANIMATIONS[name] = a;
@@ -221,6 +286,22 @@ var qanim =
 			let anim = qanim.anim.ANIMATIONS[name];
 			for(let i in value)
 			{
+				if(!(value[i] instanceof Array))
+					value[i] = [value[i]];
+				if(i=="animation_play")
+				{
+					if(qanim.anim.ANIMATIONS[value[i][0]])
+					{						
+						let temp_anim = Object.assign({},qanim.anim.ANIMATIONS[value[i][0]]);
+						temp_anim.first_anchor = JSON.parse(JSON.stringify(temp_anim.first_anchor));
+						anim.animations[value[i][0]] = temp_anim;
+					}
+					else
+					{
+						console.log("ERR: Animation "+(value[i][0])+" is not defined.");
+						continue;
+					}
+				}
 				if(!(anim.anchors[i]))
 				{
 					anim.anchors[i] = [];
@@ -229,7 +310,7 @@ var qanim =
 				anim.anchors[i].push({
 					time: 	30*time,
 					trans: 	value[i][1] || "constant",
-					val: 	value[i][0] | value[i],
+					val: 	value[i][0],
 					param: value[i][2] || {},
 				});
 				anim.anchors[i].sort(function(a,b){return a.time-b.time;});
@@ -279,14 +360,41 @@ var qanim =
 		},
 		draw_sprite: function(name,env,obj)
 		{
+//			qanim.scene.camera.width-=0.02;
+			//qanim.scene.camera.x=250;
+			//qanim.scene.camera.y=0;
+			//qanim.scene.camera.angle=31;
+			
 			if(!(qanim.res.SPRITES[name].ready)) return;
 			let ctx = qanim.canvas;
 			ctx.save();
-			ctx.translate(Math.floor(env.x+obj.x),Math.floor(env.y+obj.y));
-			ctx.rotate(((-Math.floor(env.angle+obj.angle)+360)%360)/180*Math.PI);
+			let _ww = qanim.scene.camera.width/2 ;
+			let _hh = qanim.scene.camera.height/2 ;
+			ctx.translate(_ww,_hh);
+			ctx.rotate(((Math.floor(qanim.scene.camera.angle)+360)%360)/180*Math.PI);
+			let cx = Math.floor(qanim.scene.camera.x);
+			let cy = Math.floor(qanim.scene.camera.y);
+			ctx.translate(-_ww,-_hh);
+			let _aa = qanim.cache.sin(qanim.scene.camera.angle);
+			let _bb = qanim.cache.cos(qanim.scene.camera.angle);
+			
+
+			let _xx = -cy*_aa -cx*_bb;
+			let _yy = -cy*_bb -cx*_aa;
+			ctx.translate(_xx,	_yy);
+
+
+			ctx.rotate(((-Math.floor(env.angle)+360)%360)/180*Math.PI);
+			let _x = Math.floor((env.x+obj.x)*env.gscalex);
+			let _y = Math.floor((env.y+obj.y)*env.gscaley);
+			ctx.translate(_x,_y);
+			ctx.rotate(((-Math.floor(obj.angle)+360)%360)/180*Math.PI);
 			let img = qanim.res.SPRITES[name];
 			ctx.globalAlpha = obj.opacity;
-			ctx.drawImage(img,Math.floor(-obj.x_offset*obj.scale*obj.scalex),Math.floor(-obj.y_offset*obj.scale*obj.scaley),Math.floor(img.width*obj.scale*obj.scalex),Math.floor(img.height*obj.scale*obj.scaley));
+			let xx = Math.floor(-obj.x_offset*obj.scale*obj.scalex*env.gscalex);
+			let yy = Math.floor(-obj.y_offset*obj.scale*obj.scaley*env.gscaley);
+			ctx.drawImage(img,xx,yy,Math.floor(img.width*obj.scale*obj.scalex*env.gscalex),Math.floor(img.height*obj.scale*obj.scaley*env.gscaley));
+			
 			ctx.restore();
 		},
 		draw_text: function(text,x,y,abs)

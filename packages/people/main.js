@@ -11,20 +11,16 @@ var people =
 		],
 		swing:
 		[
-			[100,{angle:[0,"damped"]}]
-		],
-		swing_big:
-		[
-			[100,{angle:[0,"damped",{frequency:0.06}]}]
-		],
-		shake_head:
-		[
-			[100,{angle:[0,"damped"]}]
+			[10 , {angle:[0,"damped"]}],
 		],
 		shake_body:
 		[
 			[5,{y:[1,"damped"]}],
 		],
+		swing_big:
+		[
+			[100,{angle:[0,"damped",{frequency:0.06}]}]
+		]
 
 	},
 	scenes:
@@ -35,6 +31,7 @@ var people =
 			{
 				scaley:0.7,
 				scalex:1.1,
+				angle:0,
 			},
 			sprite: "bg",
 			children: ["people1"],
@@ -93,7 +90,10 @@ var people =
 				y: 44
 			},
 			sprite: "leg",
-			animation: "swing_big"
+			animation: 
+			[
+				[	100,	{ angle:[0,"damped",{frequency:0.06}]}	]
+			]
 		},
 		leg2:
 		{
@@ -116,7 +116,10 @@ var people =
 				x: -2,
 				angle: 5,
 			},
-			animation: "shake_head",
+			animation: 
+			[
+				100,	{ angle:[0,"damped"] }
+			],
 			sprite: "head"
 		}
 	},
