@@ -33,7 +33,7 @@ var qanim =
 		},
 		camera:
 		{
-			x: 0,
+			x: 60,
 			y: 0,
 			width: 0,
 			height: 0,
@@ -361,28 +361,39 @@ var qanim =
 		draw_sprite: function(name,env,obj)
 		{
 //			qanim.scene.camera.width-=0.02;
-			//qanim.scene.camera.x=250;
+			qanim.scene.camera.y=500;			
+//			qanim.scene.camera.y=110;
 			//qanim.scene.camera.y=0;
-			//qanim.scene.camera.angle=31;
+			qanim.scene.camera.angle+=0.01;
 			
 			if(!(qanim.res.SPRITES[name].ready)) return;
 			let ctx = qanim.canvas;
 			ctx.save();
-			let _ww = qanim.scene.camera.width/2 ;
-			let _hh = qanim.scene.camera.height/2 ;
-			ctx.translate(_ww,_hh);
-			ctx.rotate(((Math.floor(qanim.scene.camera.angle)+360)%360)/180*Math.PI);
-			let cx = Math.floor(qanim.scene.camera.x);
-			let cy = Math.floor(qanim.scene.camera.y);
-			ctx.translate(-_ww,-_hh);
-			let _aa = qanim.cache.sin(qanim.scene.camera.angle);
-			let _bb = qanim.cache.cos(qanim.scene.camera.angle);
+			//matrix
+			let _a = qanim.cache.sin(qanim.scene.camera.angle);
+			let _b = qanim.cache.cos(qanim.scene.camera.angle);
 			
+			let _cx = qanim.scene.camera.x;
+			let _cy = qanim.scene.camera.y;
 
-			let _xx = -cy*_aa -cx*_bb;
-			let _yy = -cy*_bb -cx*_aa;
-			ctx.translate(_xx,	_yy);
+			let xxx = -_cx*_b - _cy*_a;
+			let yyy = -_cx*_a + _cy*_b;
+			//end matrix
+			ctx.translate(xxx,yyy);
 
+
+			let w = qanim.scene.camera.width/2;
+			let h = qanim.scene.camera.height/2;
+
+			ctx.translate(w,h);
+			//matrix
+
+			let _xx = -w*_b + h*_a;
+			let _yy = -w*_a - h*_b;
+
+			ctx.translate(_xx,_yy);
+			//end matrix
+			ctx.rotate(((Math.floor(qanim.scene.camera.angle)+360)%360)/180*Math.PI);
 
 			ctx.rotate(((-Math.floor(env.angle)+360)%360)/180*Math.PI);
 			let _x = Math.floor((env.x+obj.x)*env.gscalex);
