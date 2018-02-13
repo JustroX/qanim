@@ -7,7 +7,7 @@ var people =
 	{
 		move_right:
 		[
-			[6,{x:1000}],
+			[5,{x:670}],
 		],
 		swing:
 		[
@@ -20,27 +20,16 @@ var people =
 		swing_big:
 		[
 			[100,{angle:[0,"damped",{frequency:0.06}]}]
-		]
+		],
 
 	},
 	scenes:
 	{
-		root:
-		{
-			initial_vars:
-			{
-				scaley:0.7,
-				scalex:1.1,
-				angle:0,
-			},
-			sprite: "bg",
-			children: ["people1"],
-		},
 		people1:
 		{
 			initial_vars:
 			{
-				x: 500,
+				x: 0,
 				y: 400,
 			},
 			animation: "move_right",
@@ -90,10 +79,7 @@ var people =
 				y: 44
 			},
 			sprite: "leg",
-			animation: 
-			[
-				[	100,	{ angle:[0,"damped",{frequency:0.06}]}	]
-			]
+			animation: "swing_big"
 		},
 		leg2:
 		{
@@ -114,13 +100,13 @@ var people =
 				y_offset: 64,
 				y: -13,
 				x: -2,
-				angle: 5,
+				angle: 15,
 			},
 			animation: 
 			[
-				100,	{ angle:[0,"damped"] }
+				[5,	{ angle:[0,"damped"] }]
 			],
-			sprite: "head"
+			sprite: "head",
 		}
 	},
 	resources:

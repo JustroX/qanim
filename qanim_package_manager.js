@@ -104,6 +104,11 @@ var qpm =
 			{
 				s.behaviors = scene[i].behaviors;
 			}
+			if(scene[i].text)
+			{
+				s.text = scene[i].text.val ||  scene[i].text;
+				s.text_div = qanim.res.add_text(s.text,scene[i].text.property);
+			}
 			if(scene[i].step)
 				s.define_step(scene[i].step);
 				s.define_draw(function(env){

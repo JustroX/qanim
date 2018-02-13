@@ -73,6 +73,8 @@ var qanim =
 				parent:0,
 				depth:0,
 				opacity: 1,
+				text: "",
+				text_div: "",
 				addChildScene: function(scene)
 				{
 					a.children.push(scene);
@@ -82,7 +84,6 @@ var qanim =
 				{
 					if(!(qanim.anim.ANIMATIONS[animation]))
 					{
-						console.log("ERR: Animation "+animation+" is not defined");
 						return;
 					}
 					let anim = Object.assign({},qanim.anim.ANIMATIONS[animation]);
@@ -100,8 +101,6 @@ var qanim =
 				draw: function(env){},
 
 				define_step: function(_func){a.step = _func;},
-				define_begin_step: function(_func){a.begin_step = _func;},
-				define_end_step: function(_func){a.end_step = _func;},
 				define_draw: function(_func){a.draw= _func;},
 
 				adjust: function(env)
@@ -151,6 +150,8 @@ var qanim =
 					}
 					todrawlater.sort(function(a,b){return -a.depth+b.depth;});
 					a.draw(start_env,qanim.canvas);	
+					if(a.text)
+						qanim.res.draw_text(start_env,a);
 					for(let i in todrawlater)
 					{
 						let e =	todrawlater[i];
@@ -199,7 +200,7 @@ var qanim =
 			},
 			constant: function(a,b,t1,t2,t,o)
 			{
-				return a+(b-a)/(t2-t1)*(t-t1);
+				return (a+(b-a)/(t2-t1)*(t-t1));
 			},
 			none: function(a,b,t1,t2,t,o)
 			{
@@ -309,7 +310,6 @@ var qanim =
 					}
 					else
 					{
-						console.log("ERR: Animation "+(value[i][0])+" is not defined.");
 						continue;
 					}
 				}
@@ -343,9 +343,9 @@ var qanim =
 				cache.tan_.push(Math.tan(i/180*Math.PI));
 			}
 		},
-		sin: function(x){return qanim.cache.sin_[Math.floor(x+360) % 360];},
-		cos: function(x){return qanim.cache.cos_[Math.floor(x+360) % 360];},
-		tan: function(x){return qanim.cache.tan_[Math.floor(x+360) % 360];},
+		sin: function(x){return qanim.cache.sin_[Math.floor(x+360*10000) % 360];},
+		cos: function(x){return qanim.cache.cos_[Math.floor(x+360*10000) % 360];},
+		tan: function(x){return qanim.cache.tan_[Math.floor(x+360*10000) % 360];},
 	},
 	behaviors:
 	{
@@ -379,9 +379,14 @@ var qanim =
 		},
 		draw_sprite: function(name,env,obj)
 		{
+			qanim.scene.camera.width = qanim.scene.camera.width || qanim.canvas_src.width;
+			qanim.scene.camera.height = qanim.scene.camera.height || qanim.canvas_src.height;
 			
 			if(!(qanim.res.SPRITES[name].ready)) return;
 			let ctx = qanim.canvas;
+			let c  = qanim.scene.camera;
+			let gscalex = qanim.canvas_src.width/c.width;
+			let gscaley = qanim.canvas_src.height/c.height;
 			ctx.save();
 			//matrix
 			let _a = qanim.cache.sin(qanim.scene.camera.angle);
@@ -390,16 +395,19 @@ var qanim =
 			let _cx = qanim.scene.camera.x;
 			let _cy = qanim.scene.camera.y;
 
+
+			let w = qanim.scene.camera.width/2;
+			let h = qanim.scene.camera.height/2;
+
+			ctx.translate(w,h);
+
+			ctx.scale(gscalex,gscaley);
 			let xxx = -_cx*_b - _cy*_a;
 			let yyy = -_cx*_a + _cy*_b;
 			//end matrix
 			ctx.translate(xxx,yyy);
 
 
-			let w = qanim.scene.camera.width/2;
-			let h = qanim.scene.camera.height/2;
-
-			ctx.translate(w,h);
 			//matrix
 
 			let _xx = -w*_b + h*_a;
@@ -407,6 +415,7 @@ var qanim =
 
 			ctx.translate(_xx,_yy);
 			//end matrix
+//			ctx.scale(gscalex,gscaley);			
 			ctx.rotate(((Math.floor(qanim.scene.camera.angle)+360)%360)/180*Math.PI);
 
 			ctx.rotate(((-Math.floor(env.angle)+360)%360)/180*Math.PI);
@@ -415,17 +424,48 @@ var qanim =
 			ctx.translate(_x,_y);
 			ctx.rotate(((-Math.floor(obj.angle)+360)%360)/180*Math.PI);
 			let img = qanim.res.SPRITES[name];
-			ctx.globalAlpha = obj.opacity;
+			ctx.globalAlpha =Math.max(0,obj.opacity);
 			let xx = Math.floor(-obj.x_offset*obj.scale*obj.scalex*env.gscalex);
 			let yy = Math.floor(-obj.y_offset*obj.scale*obj.scaley*env.gscaley);
 			ctx.drawImage(img,xx,yy,Math.floor(img.width*obj.scale*obj.scalex*env.gscalex),Math.floor(img.height*obj.scale*obj.scaley*env.gscaley));
 			
 			ctx.restore();
 		},
-		draw_text: function(text,x,y,abs)
+		add_text: function(text,property={})
 		{
-			let ctx = qanim.canvas;
-			
+			let d = document.createElement("div");
+			d.style.position = "absolute";
+			d.innerHTML = text;
+			d.style.left = property.left ||  "0px";
+			d.style.top = property.top ||  "0px";
+			d.style.float = property.float ||  "left";
+			d.style.margin  = property.margin ||  "0px";
+			d.style.padding  = property.padding ||  "0px";
+			d.style.width = property.width ||  "100px";
+			d.style.height = property.height ||  "100px";
+			d.style.lineHeight = property.lineHeight  || "100px";
+			d.style.textAlign = property.textAlign ||  "center";
+			d.style.backgroundColor = property.backgroundColor ||  "";
+			d.style.fontFamily = property.fontFamily ||  "Arial";
+			d.style.fontSize = property.fontSize ||  "20px";
+			d.style.letterSpacing = property.letterSpacing ||  "2px";
+			//d.style.fontFace = property.fontFace ||  "Arial";
+			document.getElementsByTagName('body')[0].appendChild(d);
+			return d;
+		},
+		draw_text: function(env,obj)
+		{
+			let d = obj.text_div;
+			d.style.left = (obj.x+env.x - (d.clientWidth)/2) + "px"; //i dont know why -50 tho
+			d.style.top  = (obj.y+env.y - (d.clientHeight)/2) + "px"; //i dont know why -50 tho
+			d.style.opacity = obj.opacity;
+
+			//rotate
+		    d.style.webkitTransform = 'rotate('+(obj.angle+env.angle)+'deg) scale('+obj.scale+')'; 
+		    d.style.mozTransform    = 'rotate('+(obj.angle+env.angle)+'deg) scale('+obj.scale+')'; 
+		    d.style.msTransform     = 'rotate('+(obj.angle+env.angle)+'deg) scale('+obj.scale+')'; 
+		    d.style.oTransform      = 'rotate('+(obj.angle+env.angle)+'deg) scale('+obj.scale+')'; 
+		    d.style.transform       = 'rotate('+(obj.angle+env.angle)+'deg) scale('+obj.scale+')'; 
 		},
 		shape:
 		{

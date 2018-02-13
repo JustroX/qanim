@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>Quick Animation</title>
+	<link href="https://fonts.googleapis.com/css?family=Bangers|Fredoka+One" rel="stylesheet">
 	<script type="text/javascript" src="ext/webfont.js"></script>
 	<script type="text/javascript" src="qanim.js"></script>
 	<script type="text/javascript" src="qanim_package_manager.js"></script>
@@ -16,9 +17,9 @@ let res = qanim.res;
 let anim = qanim.anim;
 
 qanim.init(document.getElementById('c'));
-qpm.import(["people","def1"],function()
+qpm.import(["def1","people","promote"],function()
 {
-	qpm.set_main("people","root");
+	qpm.set_main("promote","root");
 	qanim.start();
 });
 
