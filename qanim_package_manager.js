@@ -54,6 +54,8 @@ var qpm =
 			qpm.import_animations(name,pack.animations);
 		if(pack.transitions)
 			qpm.import_transitions(name,pack.transitions);
+		if(pack.behaviors)
+			qpm.import_behaviors(name,pack.behaviors);
 		if(pack.scenes)
 			qpm.import_scenes(name,pack.scenes);
 	},
@@ -97,6 +99,10 @@ var qpm =
 				}
 				else
 				s.addAnimation(scene[i].animation);
+			}
+			if(scene[i].behaviors)
+			{
+				s.behaviors = scene[i].behaviors;
 			}
 			if(scene[i].step)
 				s.define_step(scene[i].step);
@@ -142,6 +148,13 @@ var qpm =
 		for(let i in trans)
 		{
 			qanim.anim.trans[i] = trans[i];
+		}
+	},
+	import_behaviors: function(d,behaviors)
+	{
+		for(let i in behaviors)
+		{
+			qanim.behaviors.add(i,behaviors[i]);
 		}
 	},
 	util:

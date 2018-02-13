@@ -58,6 +58,7 @@ var qanim =
 			{
 				children: [],
 				animations: [],
+				behaviors: [],
 				time: [],
 				x: 0,
 				y: 0,
@@ -88,6 +89,10 @@ var qanim =
 					anim.first_anchor = JSON.parse(JSON.stringify(anim.first_anchor));
 					a.animations.push(anim);
 				},
+				addBehavior: function(behavior)
+				{
+					a.behaviors.push(behavior);
+				},
 
 				begin_step: function(env){},
 				step: function(env){},
@@ -116,6 +121,12 @@ var qanim =
 					for(let i in a.animations)
 					{
 						a.animations[i].step(env,a,i);
+					}
+					//execute all behaviors
+					for(let i in a.behaviors)
+					{
+						if(qanim.behaviors.BEHAVIORS[a.behaviors[i]])
+							qanim.behaviors.BEHAVIORS[a.behaviors[i]](env,a);
 					}
 					a.step(env);
 					env = a.adjust(env);
@@ -336,6 +347,14 @@ var qanim =
 		cos: function(x){return qanim.cache.cos_[Math.floor(x+360) % 360];},
 		tan: function(x){return qanim.cache.tan_[Math.floor(x+360) % 360];},
 	},
+	behaviors:
+	{
+		BEHAVIORS: {},
+		add: function(name,func)
+		{
+			qanim.behaviors.BEHAVIORS[name] = func;
+		},
+	},
 	res:
 	{
 		SPRITES: {},
@@ -360,11 +379,6 @@ var qanim =
 		},
 		draw_sprite: function(name,env,obj)
 		{
-//			qanim.scene.camera.width-=0.02;
-			qanim.scene.camera.y=500;			
-//			qanim.scene.camera.y=110;
-			//qanim.scene.camera.y=0;
-			qanim.scene.camera.angle+=0.01;
 			
 			if(!(qanim.res.SPRITES[name].ready)) return;
 			let ctx = qanim.canvas;
