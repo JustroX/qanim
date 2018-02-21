@@ -75,6 +75,7 @@ var qanim =
 				opacity: 1,
 				text: "",
 				text_div: "",
+				skin: [],
 				addChildScene: function(scene)
 				{
 					a.children.push(scene);
@@ -88,6 +89,7 @@ var qanim =
 					}
 					let anim = Object.assign({},qanim.anim.ANIMATIONS[animation]);
 					anim.first_anchor = JSON.parse(JSON.stringify(anim.first_anchor));
+//					console.log(JSON.stringify(anim));
 					a.animations.push(anim);
 				},
 				addBehavior: function(behavior)
@@ -204,7 +206,7 @@ var qanim =
 			},
 			none: function(a,b,t1,t2,t,o)
 			{
-				return ((t-t1)>=t2-1) ? b:a;
+				return ((t-t1)>=t2-t1-1) ? b:a;
 			}
 		},
 		create: function(name)
@@ -358,6 +360,7 @@ var qanim =
 	res:
 	{
 		SPRITES: {},
+		SPRITES_STRUC: {},
 		sprlen: 0,
 		loaded: 0,
 
@@ -377,12 +380,12 @@ var qanim =
 			qanim.res.SPRITES[name] = img;
 			qanim.res.sprlen+=1;
 		},
-		draw_sprite: function(name,env,obj)
+		draw_sprite: function(skin,env,obj)
 		{
 			qanim.scene.camera.width = qanim.scene.camera.width || qanim.canvas_src.width;
 			qanim.scene.camera.height = qanim.scene.camera.height || qanim.canvas_src.height;
-			
-			if(!(qanim.res.SPRITES[name].ready)) return;
+			let name = qanim.res.get_skin_name(skin);  
+			if(!(qanim.res.SPRITES[name] && qanim.res.SPRITES[name].ready)) return;
 			let ctx = qanim.canvas;
 			let c  = qanim.scene.camera;
 			let gscalex = qanim.canvas_src.width/c.width;
@@ -415,18 +418,19 @@ var qanim =
 
 			ctx.translate(_xx,_yy);
 			//end matrix
-//			ctx.scale(gscalex,gscaley);			
+			//ctx.scale(gscalex,gscaley);			
 			ctx.rotate(((Math.floor(qanim.scene.camera.angle)+360)%360)/180*Math.PI);
 
 			ctx.rotate(((-Math.floor(env.angle)+360)%360)/180*Math.PI);
 			let _x = Math.floor((env.x+obj.x)*env.gscalex);
 			let _y = Math.floor((env.y+obj.y)*env.gscaley);
 			ctx.translate(_x,_y);
-			ctx.rotate(((-Math.floor(obj.angle)+360)%360)/180*Math.PI);
 			let img = qanim.res.SPRITES[name];
 			ctx.globalAlpha =Math.max(0,obj.opacity);
 			let xx = Math.floor(-obj.x_offset*obj.scale*obj.scalex*env.gscalex);
 			let yy = Math.floor(-obj.y_offset*obj.scale*obj.scaley*env.gscaley);
+			//ctx.translate(xx,yy);
+			ctx.rotate(((-Math.floor(obj.angle)+360)%360)/180*Math.PI);
 			ctx.drawImage(img,xx,yy,Math.floor(img.width*obj.scale*obj.scalex*env.gscalex),Math.floor(img.height*obj.scale*obj.scaley*env.gscaley));
 			
 			ctx.restore();
@@ -452,6 +456,35 @@ var qanim =
 			//d.style.fontFace = property.fontFace ||  "Arial";
 			document.getElementsByTagName('body')[0].appendChild(d);
 			return d;
+		},
+		add_skin: function(name,dir,w,h,pack,parent=[])
+		{
+			let cur_struc = qanim.res.SPRITES_STRUC;
+			let i = 0;
+			while(i<parent.length)
+			{
+				if(cur_struc[parent[i]]);
+				else
+				if(i==parent.length-1)
+					cur_struc[parent[i]] = name;
+				else
+					cur_struc[parent[i]] = {};
+				i++;
+			}
+			qanim.res.add_sprite([pack].concat(parent.concat([name])).join("_"),"packages/"+pack+"/res/"+dir,w,h);
+		},
+		get_skin: function(name,parent=[])
+		{
+			let skin  = qanim.res.SPRITES[parent.concat([name]).join("_")];
+			if(skin)
+				return skin;
+			console.log("ERROR: skin "+name+" of '"+parent.join(" ")+"' is not defined.");
+			return;
+		},
+		get_skin_name: function(parent=[])
+		{
+		//	console.log(parent.join("_"));
+			return parent.join("_");
 		},
 		draw_text: function(env,obj)
 		{

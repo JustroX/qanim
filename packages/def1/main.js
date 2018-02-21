@@ -38,6 +38,12 @@ var def1 =
 	},
 	transitions:
 	{
+		swing: function(a,b,t1,t2,t,o)
+		{
+			let period = o.period || (1/o.frequency) || 20;
+			let base_amp = o.amplitude || 0;
+			return ((base_amp)*qanim.cache.cos(360/period*(t-t1)) + b);
+		},
 		damped: function(a,b,t1,t2,t,o)
 		{
 			let period = o.period || (1/o.frequency) || 20;
@@ -55,7 +61,14 @@ var def1 =
 			let xx  = t-t1;
 			let tt = t2-t1;
 			return a+d*(0.5*tanh(6*xx/tt-3)+0.5);
-		}
+		},
+		damped2: function(a,b,t1,t2,t,o)
+		{
+			let period = o.period || (1/o.frequency) || 20;
+			let base_amp = o.amplitude || 0;
+			base_amp = def1.transitions.slow_in_out(base_amp,0,t1-10,t2+10,t,o);
+			return ((base_amp)*qanim.cache.cos(360/period*(t-t1)) + b);
+		},
 	},
 	scenes:
 	{

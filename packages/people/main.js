@@ -5,19 +5,19 @@ var people =
 	version: "1.0.0",
 	animations:
 	{
-		move_right:
+		people_move_right:
 		[
 			[5,{x:670}],
 		],
-		swing:
+		people_swing:
 		[
-			[10 , {angle:[0,"damped"]}],
+			[0 , {angle:90}]
 		],
-		shake_body:
+		people_shake_body:
 		[
 			[5,{y:[1,"damped"]}],
 		],
-		swing_big:
+		people_swing_big:
 		[
 			[100,{angle:[0,"damped",{frequency:0.06}]}]
 		],
@@ -32,7 +32,7 @@ var people =
 				x: 0,
 				y: 400,
 			},
-			animation: "move_right",
+//			animation: "move_right",
 			children: ["body","arm1","arm2","leg1","leg2","head"],
 
 		},
@@ -43,7 +43,7 @@ var people =
 				x_offset:32,
 				y_offset:16,
 			},
-			animation: "shake_body",
+			animation: "people_shake_body",
 			sprite: "body",
 		},
 		arm1:
@@ -53,9 +53,10 @@ var people =
 				angle: 30,
 				depth: -1,
 				x_offset: 32,
-				y_offset: 3
+				y_offset: 3,
+				skin: ["right"],
 			},
-			animation: "swing",
+			//animation: "people_swing",
 			sprite: "arm",
 		},
 		arm2:
@@ -66,8 +67,9 @@ var people =
 				angle:-30,
 				x_offset: 32,
 				y_offset: 3,
+				skin: ["right"],
 			},
-			animation: "swing",
+			//animation: "people_swing",
 			sprite: "arm",
 		},
 		leg1:
@@ -76,10 +78,11 @@ var people =
 			{
 				angle: 30,
 				x_offset:32,
-				y: 44
+				y: 44,
+				skin: ["right"],
 			},
 			sprite: "leg",
-			animation: "swing_big"
+			//animation: "people_swing_big"
 		},
 		leg2:
 		{
@@ -87,10 +90,11 @@ var people =
 			{
 				angle: -30,
 				x_offset:32,
-				y: 44
+				y: 44,
+				skin: ["right"],
 			},
 			sprite: "leg",
-			animation: "swing_big",
+			//animation: "people_swing_big",
 		},
 		head:
 		{
@@ -100,12 +104,15 @@ var people =
 				y_offset: 64,
 				y: -13,
 				x: -2,
-				angle: 15,
+				angle: 20,
+				skin:["face_right"]
 			},
 			animation: 
 			[
-				[5,	{ angle:[0,"damped"] }]
+				[10,	{ angle:[0,"damped"] }],
+	//			[7, {skin:[["default"],"none"]}],
 			],
+
 			sprite: "head",
 		}
 	},
@@ -113,31 +120,44 @@ var people =
 	{
 		head:
 		{
-			dir: "head_side.svg",
+			src: 
+			{
+				default: "head.svg",
+				face_right: "head_side.svg",
+				face_left: "head_left.svg",
+			},
 			width: 64,
 			height: 64,
 		},
 		body:
 		{
-			dir: "body.svg",
+			src: "body.svg",
 			width: 64,
 			height: 64,
 		},
 		arm:
 		{
-			dir: "arm.svg",
+			src:
+			{
+			 	right:"arm.svg",
+			 	left:"arm_left.svg",
+			},
 			width: 64,
 			height: 64,
 		},
 		leg:
 		{
-			dir: "leg.svg",
+			src: 
+			{
+				right:"leg.svg",
+				left: "leg_left.svg"
+			},
 			width: 64,
 			height: 64,
 		},
 		bg:
 		{
-			dir: "bg.png",
+			src: "bg.png",
 			width: 1280,
 			height:1024
 		}

@@ -113,7 +113,9 @@ var qpm =
 				s.define_step(scene[i].step);
 				s.define_draw(function(env){
 					if(scene[i].sprite)
-					qanim.res.draw_sprite(d+scene[i].sprite,env,s);
+					{
+						qanim.res.draw_sprite([d,scene[i].sprite].concat(s.skin),env,s);
+					}
 					if(scene[i].draw)
 					scene[i].draw(env);
 				});
@@ -142,10 +144,23 @@ var qpm =
 	},
 	import_resources: function(d,res)
 	{
+		let import_skin = function(name,value,o,ancestors = [])
+		{
+			if(typeof value == "string")
+			{
+				qanim.res.add_skin(name,value,o.width,o.height,d,ancestors);
+				return;
+			}
+			for(let i in value)
+			{
+				import_skin(i,value[i],o,ancestors.concat((name=="default")?[]:[name]));
+			}
+		}
+
 		for(let i in res)
 		{
 			let o = res[i];
-			qanim.res.add_sprite(d+i,"packages/"+d+"/res/"+o.dir,o.width,o.height);
+			import_skin(i,o.src,o,[]);
 		}
 	},
 	import_transitions: function(d,trans)

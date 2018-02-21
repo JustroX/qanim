@@ -6,6 +6,7 @@
 	<script type="text/javascript" src="ext/webfont.js"></script>
 	<script type="text/javascript" src="qanim.js"></script>
 	<script type="text/javascript" src="qanim_package_manager.js"></script>
+	<script type="text/javascript" src="qanim_timeline.js"></script>
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -19,8 +20,10 @@ let anim = qanim.anim;
 qanim.init(document.getElementById('c'));
 qpm.import(["def1","people","promote"],function()
 {
-	qpm.set_main("promote","root");
-	qanim.start();
+	qt.set("main",function(){
+		qpm.set_main("promote","root");
+		qanim.start();
+	});
 });
 
 </script>
