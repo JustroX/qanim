@@ -1,6 +1,8 @@
 # qanim
 Modular HTML5 canvas animator 
 
+**This is repository is not updated. Updated source code is in the author's local device.**
+
 ### Quick Basic
 **HTML:**
 ```html
@@ -23,10 +25,7 @@ qpm.import(["people","def1"],function()     //import scenes
 	qanim.start();                          //start animation
 });
 ```
-Basically
-1. Define the scenes (or the animation)
-2. Import it
-3. Tada! Your done!
+Sample output:
 
 ![Screenshot](https://raw.githubusercontent.com/JustroX/qanim/master/readme.png)
 
