@@ -1,7 +1,7 @@
 # qanim
 Modular HTML5 canvas animator 
 
-**This is repository is not updated. Updated source code is in the author's local device.**
+**This repository is not updated. Stable source code is in the author's local device.**
 
 ### Quick Basic
 **HTML:**
